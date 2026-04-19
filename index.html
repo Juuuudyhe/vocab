@@ -9,7 +9,6 @@
 <meta name="apple-mobile-web-app-title" content="教甄單字本">
 <meta name="theme-color" content="#1a1a2e">
 <title>教甄單字本</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -28,7 +27,6 @@
   html, body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); height: 100%; overflow: hidden; }
   #app { display: flex; flex-direction: column; height: 100dvh; max-width: 480px; margin: 0 auto; }
 
-/* HEADER */
 .header { background: var(–ink); padding: 14px 20px 10px; flex-shrink: 0; }
 .header-row { display: flex; justify-content: space-between; align-items: center; }
 .logo { font-family: ‘Playfair Display’, serif; color: var(–paper); font-size: 1.2rem; }
@@ -36,7 +34,6 @@
 .word-count { font-size: 0.73rem; color: var(–muted); margin-top: 3px; }
 .word-count strong { color: var(–gold); }
 
-/* NAV */
 .nav { display: flex; background: var(–cream); border-bottom: 1px solid #ddd5c8; flex-shrink: 0; }
 .nav-btn { flex: 1; padding: 12px 0; border: none; background: none; font-family: ‘DM Sans’, sans-serif; font-size: 0.8rem; font-weight: 500; color: var(–muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; }
 .nav-btn.active { color: var(–accent); border-bottom-color: var(–accent); }
@@ -44,7 +41,6 @@
 .screen { display: none; flex: 1; overflow-y: auto; flex-direction: column; }
 .screen.active { display: flex; }
 
-/* SHARED */
 .field-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(–muted); margin-bottom: 6px; }
 .field-group { display: flex; flex-direction: column; }
 input[type=“text”], textarea { font-family: ‘DM Sans’, sans-serif; font-size: 1rem; border: 1.5px solid var(–cream); border-radius: 10px; padding: 12px 14px; background: var(–card); color: var(–ink); outline: none; transition: border-color 0.2s; }
@@ -57,10 +53,8 @@ textarea { resize: none; height: 72px; }
 .btn-primary:active { opacity: 0.8; }
 .btn-secondary { background: var(–cream); color: var(–ink); border: none; border-radius: 12px; padding: 14px; font-family: ‘DM Sans’, sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer; width: 100%; }
 
-/* ADD SCREEN */
 .add-screen { padding: 20px; gap: 14px; }
 
-/* LIST SCREEN */
 .search-bar { padding: 12px 16px; background: var(–cream); border-bottom: 1px solid #ddd5c8; flex-shrink: 0; }
 .search-bar input { width: 100%; font-size: 0.9rem; padding: 10px 14px; border-radius: 10px; }
 .filter-chips { display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto; flex-shrink: 0; background: var(–paper); border-bottom: 1px solid var(–cream); }
@@ -82,7 +76,6 @@ textarea { resize: none; height: 72px; }
 .error-badge.zero { background: #eaf6ee; color: var(–success); }
 .error-badge.low { background: #fff8e1; color: #b8860b; }
 .error-badge.high { background: #fdecea; color: var(–danger); }
-
 .word-card-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
 .icon-btn { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; transition: all 0.15s; }
 .icon-btn.del { background: #fdecea; color: var(–danger); }
@@ -92,11 +85,9 @@ textarea { resize: none; height: 72px; }
 .empty-state .emoji { font-size: 2.5rem; margin-bottom: 12px; }
 .empty-state p { font-size: 0.9rem; line-height: 1.6; }
 
-/* STATS SCREEN */
 .stats-screen { padding: 20px; gap: 14px; }
 .stats-title { font-family: ‘Playfair Display’, serif; font-size: 1.4rem; }
 .stats-title span { color: var(–accent); }
-
 .stats-overview { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .stat-card { background: var(–card); border-radius: 14px; padding: 16px; text-align: center; box-shadow: 0 1px 8px rgba(26,26,46,0.06); }
 .stat-num { font-family: ‘Playfair Display’, serif; font-size: 2rem; }
@@ -104,9 +95,7 @@ textarea { resize: none; height: 72px; }
 .stat-num.green { color: var(–success); }
 .stat-num.gold { color: var(–gold); }
 .stat-label { font-size: 0.72rem; color: var(–muted); margin-top: 3px; }
-
 .section-title { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(–muted); margin-top: 6px; }
-
 .weak-list { display: flex; flex-direction: column; gap: 8px; }
 .weak-card { background: var(–card); border-radius: 12px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 6px rgba(26,26,46,0.05); }
 .weak-card-left { flex: 1; }
@@ -114,19 +103,15 @@ textarea { resize: none; height: 72px; }
 .weak-zh { font-size: 0.8rem; color: var(–muted); margin-top: 2px; }
 .weak-errors { background: #fdecea; color: var(–danger); font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
 .weak-errors.medium { background: #fff8e1; color: #b8860b; }
-
 .reset-btn { background: none; border: 1.5px solid #ddd5c8; border-radius: 10px; padding: 10px 16px; font-family: ‘DM Sans’, sans-serif; font-size: 0.82rem; color: var(–muted); cursor: pointer; }
-.reset-btn:active { background: var(–cream); }
 .reset-row { display: flex; justify-content: flex-end; }
 
-/* QUIZ SCREEN */
 .quiz-setup { padding: 24px 20px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
 .quiz-setup h2 { font-family: ‘Playfair Display’, serif; font-size: 1.4rem; }
 .quiz-setup h2 span { color: var(–accent); }
 .option-row { display: flex; gap: 8px; }
 .option-btn { flex: 1; padding: 11px 0; border-radius: 10px; border: 1.5px solid var(–cream); background: var(–card); font-family: ‘DM Sans’, sans-serif; font-size: 0.82rem; cursor: pointer; transition: all 0.15s; color: var(–muted); }
 .option-btn.selected { background: var(–ink); color: var(–gold); border-color: var(–ink); }
-
 .quiz-active { padding: 20px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
 .quiz-progress { display: flex; align-items: center; gap: 10px; }
 .progress-bar { flex: 1; height: 6px; background: var(–cream); border-radius: 3px; overflow: hidden; }
@@ -144,7 +129,6 @@ textarea { resize: none; height: 72px; }
 .choice-btn:disabled { cursor: default; }
 .next-btn { background: var(–accent); color: white; border: none; border-radius: 12px; padding: 15px; font-family: ‘DM Sans’, sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; }
 .next-btn:active { opacity: 0.8; }
-
 .quiz-result { padding: 32px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; flex: 1; overflow-y: auto; }
 .result-emoji { font-size: 3.5rem; }
 .result-score { font-family: ‘Playfair Display’, serif; font-size: 3rem; color: var(–ink); }
@@ -156,8 +140,6 @@ textarea { resize: none; height: 72px; }
 .breakdown-num.green { color: var(–success); }
 .breakdown-num.red { color: var(–danger); }
 .breakdown-label { font-size: 0.72rem; color: var(–muted); margin-top: 2px; }
-
-/* wrong words list in result */
 .result-wrong-title { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(–muted); align-self: flex-start; }
 .result-wrong-list { width: 100%; display: flex; flex-direction: column; gap: 8px; }
 .result-wrong-item { background: #fdecea; border-radius: 10px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; }
@@ -165,16 +147,13 @@ textarea { resize: none; height: 72px; }
 .rwi-zh { font-size: 0.78rem; color: var(–danger); margin-top: 2px; }
 .rwi-count { font-size: 0.72rem; font-weight: 700; color: var(–danger); white-space: nowrap; }
 
-/* Modal */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(26,26,46,0.5); z-index: 200; align-items: flex-end; }
 .modal-overlay.open { display: flex; }
 .modal { background: var(–paper); border-radius: 20px 20px 0 0; padding: 20px; width: 100%; max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; max-height: 90dvh; overflow-y: auto; }
 .modal-title { font-family: ‘Playfair Display’, serif; font-size: 1.1rem; margin-bottom: 4px; }
 
-/* Toast */
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(–ink); color: var(–paper); padding: 10px 20px; border-radius: 20px; font-size: 0.85rem; transition: transform 0.3s ease; z-index: 999; white-space: nowrap; pointer-events: none; }
 .toast.show { transform: translateX(-50%) translateY(0); }
-
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: var(–cream); border-radius: 2px; }
 </style>
@@ -182,26 +161,18 @@ textarea { resize: none; height: 72px; }
 </head>
 <body>
 <div id="app">
-
-  <!-- HEADER -->
-
   <div class="header">
     <div class="header-row">
       <div class="logo">教甄<span>單字本</span></div>
     </div>
     <div class="word-count">共 <strong id="totalCount">0</strong> 個單字</div>
   </div>
-
-  <!-- NAV -->
-
   <div class="nav">
     <button class="nav-btn active" onclick="showScreen('list')">📚 單字本</button>
     <button class="nav-btn" onclick="showScreen('add')">➕ 新增</button>
     <button class="nav-btn" onclick="showScreen('quiz')">🎯 測驗</button>
     <button class="nav-btn" onclick="showScreen('stats')">📊 統計</button>
   </div>
-
-  <!-- SCREEN: LIST -->
 
   <div class="screen active list-screen" id="screen-list">
     <div class="search-bar">
@@ -213,8 +184,6 @@ textarea { resize: none; height: 72px; }
     </div>
     <div class="word-list" id="wordList"></div>
   </div>
-
-  <!-- SCREEN: ADD -->
 
   <div class="screen add-screen" id="screen-add">
     <div class="field-group">
@@ -254,8 +223,6 @@ textarea { resize: none; height: 72px; }
     <button class="btn-primary" onclick="saveWord()">✦ 儲存單字</button>
   </div>
 
-  <!-- SCREEN: QUIZ -->
-
   <div class="screen quiz-screen" id="screen-quiz">
     <div class="quiz-setup" id="quizSetup">
       <h2>測驗<span>模式</span></h2>
@@ -283,60 +250,45 @@ textarea { resize: none; height: 72px; }
       </div>
       <button class="btn-primary" onclick="startQuiz()">開始測驗 →</button>
     </div>
-
-```
-<div class="quiz-active" id="quizActive" style="display:none">
-  <div class="quiz-progress">
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="progress-text" id="progressText"></div>
+    <div class="quiz-active" id="quizActive" style="display:none">
+      <div class="quiz-progress">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-text" id="progressText"></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-mode-label" id="quizLabel"></div>
+        <div class="quiz-question" id="quizQ"></div>
+        <div class="quiz-hint" id="quizHint"></div>
+      </div>
+      <div id="answerArea"></div>
+      <button class="next-btn" id="nextBtn" onclick="nextQ()" style="display:none">下一題 →</button>
+    </div>
+    <div class="quiz-result" id="quizResult" style="display:none">
+      <div class="result-emoji" id="resEmoji"></div>
+      <div class="result-score"><span id="resScore"></span> / <span id="resTotal"></span></div>
+      <div class="result-label">答對題數</div>
+      <div class="result-breakdown">
+        <div class="breakdown-item"><div class="breakdown-num green" id="resCorrect"></div><div class="breakdown-label">答對</div></div>
+        <div class="breakdown-item"><div class="breakdown-num red" id="resWrong"></div><div class="breakdown-label">答錯</div></div>
+        <div class="breakdown-item"><div class="breakdown-num" id="resPct" style="color:var(--gold)"></div><div class="breakdown-label">正確率</div></div>
+      </div>
+      <div class="result-wrong-title" id="wrongListTitle" style="display:none">這次答錯的單字</div>
+      <div class="result-wrong-list" id="wrongList"></div>
+      <button class="btn-primary" onclick="startQuiz()">再試一次</button>
+      <button class="btn-secondary" onclick="backToSetup()">更改設定</button>
+    </div>
   </div>
-  <div class="quiz-card">
-    <div class="quiz-mode-label" id="quizLabel"></div>
-    <div class="quiz-question" id="quizQ"></div>
-    <div class="quiz-hint" id="quizHint"></div>
-  </div>
-  <div id="answerArea"></div>
-  <button class="next-btn" id="nextBtn" onclick="nextQ()" style="display:none">下一題 →</button>
-</div>
-
-<div class="quiz-result" id="quizResult" style="display:none">
-  <div class="result-emoji" id="resEmoji"></div>
-  <div class="result-score"><span id="resScore"></span> / <span id="resTotal"></span></div>
-  <div class="result-label">答對題數</div>
-  <div class="result-breakdown">
-    <div class="breakdown-item"><div class="breakdown-num green" id="resCorrect"></div><div class="breakdown-label">答對</div></div>
-    <div class="breakdown-item"><div class="breakdown-num red" id="resWrong"></div><div class="breakdown-label">答錯</div></div>
-    <div class="breakdown-item"><div class="breakdown-num" id="resPct" style="color:var(--gold)"></div><div class="breakdown-label">正確率</div></div>
-  </div>
-  <div class="result-wrong-title" id="wrongListTitle" style="display:none">這次答錯的單字</div>
-  <div class="result-wrong-list" id="wrongList"></div>
-  <button class="btn-primary" onclick="startQuiz()">再試一次</button>
-  <button class="btn-secondary" onclick="backToSetup()">更改設定</button>
-</div>
-```
-
-  </div>
-
-  <!-- SCREEN: STATS -->
 
   <div class="screen stats-screen" id="screen-stats">
     <div class="stats-title">錯誤<span>追蹤</span></div>
-
-```
-<div class="stats-overview" id="statsOverview"></div>
-
-<div class="section-title">答錯最多的單字</div>
-<div class="weak-list" id="weakList"></div>
-
-<div class="reset-row">
-  <button class="reset-btn" onclick="confirmReset()">🔄 重置所有錯誤紀錄</button>
-</div>
-```
-
+    <div class="stats-overview" id="statsOverview"></div>
+    <div class="section-title">答錯最多的單字</div>
+    <div class="weak-list" id="weakList"></div>
+    <div class="reset-row">
+      <button class="reset-btn" onclick="confirmReset()">🔄 重置所有錯誤紀錄</button>
+    </div>
   </div>
 </div>
-
-<!-- Edit Modal -->
 
 <div class="modal-overlay" id="editModal" onclick="if(event.target===this)closeEdit()">
   <div class="modal">
@@ -361,7 +313,6 @@ let selPos = '', selTag = '', activeFilter = 'all';
 let qOpts = { dir: 'en', pool: 'all', count: 10 };
 let qList = [], qIdx = 0, qScore = 0, wrongWords = [];
 
-// ── NAV ──
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -372,7 +323,6 @@ function showScreen(name) {
   if (name === 'stats') renderStats();
 }
 
-// ── CHIPS ──
 function toggleChip(el, type, val) {
   const groupId = type === 'pos' ? 'posGroup' : 'tagGroup';
   document.querySelectorAll(`#${groupId} .tag-chip`).forEach(c => c.classList.remove('selected'));
@@ -380,7 +330,6 @@ function toggleChip(el, type, val) {
   else { selTag = selTag === val ? '' : val; if (selTag) el.classList.add('selected'); }
 }
 
-// ── SAVE WORD ──
 function saveWord() {
   const en = document.getElementById('inputEn').value.trim();
   const zh = document.getElementById('inputZh').value.trim();
@@ -395,7 +344,6 @@ function saveWord() {
   updateCount(); toast('✦ 單字已儲存！'); showScreen('list');
 }
 
-// ── LIST ──
 function setFilter(tag, el) {
   activeFilter = tag;
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
@@ -462,7 +410,6 @@ function delWord(id) {
 
 function updateCount() { document.getElementById('totalCount').textContent = words.length; }
 
-// ── EDIT ──
 function openEdit(id) {
   const w = words.find(x => x.id === id); if (!w) return;
   document.getElementById('editId').value = id;
@@ -481,32 +428,26 @@ function saveEdit() {
 }
 function closeEdit() { document.getElementById('editModal').classList.remove('open'); }
 
-// ── STATS ──
 function renderStats() {
   const totalErrors = words.reduce((s,w) => s + (w.errors||0), 0);
   const totalCorrect = words.reduce((s,w) => s + (w.correct||0), 0);
   const totalAttempts = totalErrors + totalCorrect;
   const pct = totalAttempts ? Math.round(totalCorrect/totalAttempts*100) : 0;
   const weakWords = words.filter(w => (w.errors||0) >= 1).sort((a,b) => (b.errors||0)-(a.errors||0));
-
   document.getElementById('statsOverview').innerHTML = `
     <div class="stat-card"><div class="stat-num gold">${totalAttempts}</div><div class="stat-label">總作答次數</div></div>
     <div class="stat-card"><div class="stat-num green">${totalCorrect}</div><div class="stat-label">答對次數</div></div>
     <div class="stat-card"><div class="stat-num red">${totalErrors}</div><div class="stat-label">答錯次數</div></div>
     <div class="stat-card"><div class="stat-num ${pct>=70?'green':'red'}">${pct}%</div><div class="stat-label">整體正確率</div></div>`;
-
   const wl = document.getElementById('weakList');
   if (!weakWords.length) {
     wl.innerHTML = `<div class="empty-state"><div class="emoji">🏆</div><p>還沒有錯誤紀錄<br>完成測驗後這裡會顯示你的弱點</p></div>`;
     return;
   }
-  wl.innerHTML = weakWords.slice(0, 20).map(w => {
-    const e = w.errors || 0;
+  wl.innerHTML = weakWords.slice(0,20).map(w => {
+    const e = w.errors||0;
     return `<div class="weak-card">
-      <div class="weak-card-left">
-        <div class="weak-en">${w.en}</div>
-        <div class="weak-zh">${w.zh}</div>
-      </div>
+      <div class="weak-card-left"><div class="weak-en">${w.en}</div><div class="weak-zh">${w.zh}</div></div>
       <span class="weak-errors ${e<=3?'medium':''}">${e} 次錯誤</span>
     </div>`;
   }).join('');
@@ -519,7 +460,6 @@ function confirmReset() {
   }
 }
 
-// ── QUIZ ──
 function setOpt(key, val, el) {
   qOpts[key] = val;
   document.querySelectorAll(`.quiz-setup .option-btn`).forEach(b => { if(b.getAttribute('onclick')?.includes(`'${key}'`)) b.classList.remove('selected'); });
@@ -533,14 +473,8 @@ function backToSetup() {
 }
 
 function startQuiz() {
-  let pool = qOpts.pool === 'weak'
-    ? words.filter(w => (w.errors||0) >= 1)
-    : [...words];
-
-  if (pool.length < 4) {
-    toast(qOpts.pool === 'weak' ? '常錯單字不足 4 個，請先做測驗累積錯誤' : '至少需要 4 個單字才能測驗');
-    return;
-  }
+  let pool = qOpts.pool === 'weak' ? words.filter(w => (w.errors||0) >= 1) : [...words];
+  if (pool.length < 4) { toast(qOpts.pool==='weak'?'常錯單字不足 4 個':'至少需要 4 個單字才能測驗'); return; }
   shuffle(pool);
   const cnt = qOpts.count === 'all' ? pool.length : Math.min(qOpts.count, pool.length);
   qList = pool.slice(0, cnt);
@@ -553,10 +487,9 @@ function startQuiz() {
 
 function renderQ() {
   const q = qList[qIdx];
-  document.getElementById('progressFill').style.width = (qIdx / qList.length * 100) + '%';
+  document.getElementById('progressFill').style.width = (qIdx/qList.length*100)+'%';
   document.getElementById('progressText').textContent = `${qIdx+1} / ${qList.length}`;
   document.getElementById('nextBtn').style.display = 'none';
-
   if (qOpts.dir === 'en') {
     document.getElementById('quizLabel').textContent = '這個單字的中文意思是？';
     document.getElementById('quizQ').textContent = q.en;
@@ -566,13 +499,10 @@ function renderQ() {
     document.getElementById('quizQ').textContent = q.zh;
     document.getElementById('quizHint').textContent = '';
   }
-
-  // Build 4 choices from full word pool
-  let distractors = shuffle([...words.filter(w => w.id !== q.id)]).slice(0, 3);
+  let distractors = shuffle([...words.filter(w => w.id !== q.id)]).slice(0,3);
   let choices = shuffle([q, ...distractors]);
-
   document.getElementById('answerArea').innerHTML = `<div class="quiz-choices">${choices.map(c => {
-    const label = qOpts.dir === 'en' ? c.zh : c.en;
+    const label = qOpts.dir==='en' ? c.zh : c.en;
     return `<button class="choice-btn" data-id="${c.id}" onclick="pickMC(this,${c.id},${q.id})">${label}</button>`;
   }).join('')}</div>`;
 }
@@ -581,9 +511,8 @@ function pickMC(el, pickedId, correctId) {
   document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
   const w = words.find(x => x.id === correctId);
   if (pickedId === correctId) {
-    el.classList.add('correct');
-    qScore++;
-    if (w) { w.correct = (w.correct||0) + 1; }
+    el.classList.add('correct'); qScore++;
+    if (w) w.correct = (w.correct||0) + 1;
   } else {
     el.classList.add('wrong');
     document.querySelectorAll('.choice-btn').forEach(b => { if (+b.dataset.id === correctId) b.classList.add('reveal'); });
@@ -603,15 +532,13 @@ function showResult() {
   document.getElementById('quizActive').style.display = 'none';
   document.getElementById('quizResult').style.display = 'flex';
   const total = qList.length;
-  const pct = Math.round(qScore / total * 100);
+  const pct = Math.round(qScore/total*100);
   document.getElementById('resScore').textContent = qScore;
   document.getElementById('resTotal').textContent = total;
   document.getElementById('resCorrect').textContent = qScore;
   document.getElementById('resWrong').textContent = total - qScore;
-  document.getElementById('resPct').textContent = pct + '%';
-  document.getElementById('resEmoji').textContent = pct >= 90 ? '🏆' : pct >= 70 ? '🎉' : pct >= 50 ? '📚' : '💪';
-
-  // Show wrong words summary
+  document.getElementById('resPct').textContent = pct+'%';
+  document.getElementById('resEmoji').textContent = pct>=90?'🏆':pct>=70?'🎉':pct>=50?'📚':'💪';
   const wt = document.getElementById('wrongListTitle');
   const wl = document.getElementById('wrongList');
   if (wrongWords.length) {
@@ -621,15 +548,11 @@ function showResult() {
         <div><div class="rwi-en">${w.en}</div><div class="rwi-zh">${w.zh}</div></div>
         <span class="rwi-count">累計錯 ${w.errors} 次</span>
       </div>`).join('');
-  } else {
-    wt.style.display = 'none';
-    wl.innerHTML = '';
-  }
+  } else { wt.style.display = 'none'; wl.innerHTML = ''; }
 }
 
-// ── UTILS ──
 function shuffle(arr) {
-  for (let i = arr.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  for (let i=arr.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
   return arr;
 }
 
@@ -641,9 +564,7 @@ function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// ── INIT ──
-// Migrate old data without error/correct fields
-words.forEach(w => { if (!('errors' in w)) w.errors = 0; if (!('correct' in w)) w.correct = 0; });
+words.forEach(w => { if (!('errors' in w)) w.errors=0; if (!('correct' in w)) w.correct=0; });
 save();
 updateCount(); renderChips(); renderList();
 </script>
