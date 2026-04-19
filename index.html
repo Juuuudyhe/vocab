@@ -551,17 +551,101 @@ input[type=file] { display:none; }
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
+// ══ FIREBASE ══
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyArBnvVipV64_pjhTdC-6geAoH5rkrYIiU",
+  authDomain: "vocab-a1d90.firebaseapp.com",
+  projectId: "vocab-a1d90",
+  storageBucket: "vocab-a1d90.firebasestorage.app",
+  messagingSenderId: "392966335635",
+  appId: "1:392966335635:web:3a9bc67bb30648bc80b166"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const DATA_DOC = doc(db, 'vocab', 'main');
+
+let syncTimer = null;
+let remoteListening = false;
+
+// 推送到雲端（1秒防抖）
+function pushToCloud() {
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(async () => {
+    try {
+      await setDoc(DATA_DOC, {
+        words: JSON.stringify(words),
+        totalAns: gTotalAns,
+        totalC: gTotalC,
+        updatedAt: Date.now()
+      });
+    } catch(e) { console.warn('雲端同步失敗', e); }
+  }, 1000);
+}
+
+// 監聽雲端變化（即時同步）
+function startCloudSync() {
+  if (remoteListening) return;
+  remoteListening = true;
+  onSnapshot(DATA_DOC, (snap) => {
+    if (!snap.exists()) return;
+    const d = snap.data();
+    const remoteWords = JSON.parse(d.words || '[]');
+    // 只有雲端比本地新才更新
+    if (d.updatedAt > (lastLocalUpdate || 0)) {
+      words = remoteWords;
+      gTotalAns = d.totalAns || 0;
+      gTotalC   = d.totalC   || 0;
+      localStorage.setItem('jy2_words', d.words);
+      localStorage.setItem('jy2_totalAns', gTotalAns);
+      localStorage.setItem('jy2_totalC',   gTotalC);
+      renderList(); renderStats(); updateHeader();
+      if (remoteListening) toast('☁️ 已從雲端同步');
+    }
+  });
+}
+
+let lastLocalUpdate = Date.now();
+
 // ══ DATA ══
 let words = JSON.parse(localStorage.getItem('jy2_words') || '[]');
 let gTotalAns = +localStorage.getItem('jy2_totalAns') || 0;
 let gTotalC   = +localStorage.getItem('jy2_totalC')   || 0;
 
 function persist() {
+  lastLocalUpdate = Date.now();
   localStorage.setItem('jy2_words', JSON.stringify(words));
   localStorage.setItem('jy2_totalAns', gTotalAns);
   localStorage.setItem('jy2_totalC',   gTotalC);
+  pushToCloud();
 }
+
+// 把所有 function 掛到 window 讓 HTML onclick 可以呼叫
+window.goto = goto;
+window.setFilter = setFilter;
+window.selPos = selPos;
+window.selTag = selTag;
+window.saveWord = saveWord;
+window.delWord = delWord;
+window.openEdit = openEdit;
+window.selMPos = selMPos;
+window.closeModal = closeModal;
+window.saveEdit = saveEdit;
+window.selDir = selDir;
+window.selScope = selScope;
+window.selCount = selCount;
+window.showSetup = showSetup;
+window.startQuiz = startQuiz;
+window.checkMC = checkMC;
+window.checkType = checkType;
+window.nextQ = nextQ;
+window.resetErrors = resetErrors;
+window.exportWords = exportWords;
+window.importWords = importWords;
 
 // ══ NAVIGATION ══
 function goto(name, btn) {
@@ -957,6 +1041,7 @@ document.getElementById('editModal').addEventListener('click', e => {
 
 // ══ INIT ══
 updateHeader(); renderList(); renderStats();
+startCloudSync();
 </script>
 </body>
 </html>
