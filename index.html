@@ -846,36 +846,39 @@ function renderQ() {
   const skipBtn = document.getElementById('skipBtn');
   nextBtn.style.display = 'none'; skipBtn.style.display = '';
 
-  // Direction: en2zh = show English, pick Chinese; zh2en = show Chinese, type/pick English
+  // 兩個方向都用四選一
+  typeInp.style.display = 'none'; checkBtn.style.display = 'none';
+  mcGrid.style.display = '';
+
   if (qDir === 'en2zh') {
     document.getElementById('qPrompt').textContent = '看英文，選中文意思';
     document.getElementById('qWord').textContent = w.en;
     document.getElementById('qPos').textContent = w.pos || '';
-    typeInp.style.display = 'none'; checkBtn.style.display = 'none';
-    mcGrid.style.display = '';
-    // Build MC options (Chinese)
-    const opts = buildOpts(w, false);
+    const opts = buildOpts(w);
     mcGrid.innerHTML = opts.map(o =>
       `<button class="mc-btn" onclick="checkMC(this,'${esc(o.en)}','${esc(w.en)}')">${o.zh}</button>`
     ).join('');
   } else {
-    document.getElementById('qPrompt').textContent = '看中文，輸入英文';
+    document.getElementById('qPrompt').textContent = '看中文，選英文單字';
     document.getElementById('qWord').textContent = w.zh;
     document.getElementById('qPos').textContent = w.pos || '';
-    mcGrid.style.display = 'none';
-    typeInp.style.display = '';
-    typeInp.value = ''; typeInp.className = 'type-input'; typeInp.disabled = false;
-    checkBtn.style.display = ''; nextBtn.style.display = 'none';
-    setTimeout(() => typeInp.focus(), 60);
+    const opts = buildOpts(w);
+    mcGrid.innerHTML = opts.map(o =>
+      `<button class="mc-btn" onclick="checkMC(this,'${esc(o.en)}','${esc(w.en)}')">${o.en}</button>`
+    ).join('');
   }
 }
 
 function esc(s) { return s.replace(/'/g, "\\'"); }
 
-function buildOpts(correct, useEn) {
-  const others = words.filter(w => w.en !== correct.en);
-  shuffle(others);
-  const opts = [correct, ...others.slice(0, 3)];
+function buildOpts(correct) {
+  // 優先選同詞性的單字當干擾項
+  const samePos = words.filter(w => w.en !== correct.en && w.pos === correct.pos && correct.pos !== '');
+  const diffPos = words.filter(w => w.en !== correct.en && (w.pos !== correct.pos || correct.pos === ''));
+  shuffle(samePos); shuffle(diffPos);
+  // 盡量用同詞性填滿3個，不夠再用不同詞性補
+  const distractors = [...samePos, ...diffPos].slice(0, 3);
+  const opts = [correct, ...distractors];
   shuffle(opts);
   return opts;
 }
