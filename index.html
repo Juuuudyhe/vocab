@@ -609,7 +609,7 @@ function startCloudSync() {
   });
 }
 
-let lastLocalUpdate = Date.now();
+let lastLocalUpdate = 0; // 0 = 開啟時先以雲端為主
 
 // ══ DATA ══
 let words = JSON.parse(localStorage.getItem('jy2_words') || '[]');
