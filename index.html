@@ -9,60 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="教甄單字本">
 <meta name="theme-color" content="#1a1a2e">
 <title>教甄單字本</title>
-<link rel="apple-touch-icon" href="icon.png">
-<script>
-// Generate icon canvas and set as apple-touch-icon
-(function(){
-  const c = document.createElement('canvas');
-  c.width = 512; c.height = 512;
-  const ctx = c.getContext('2d');
-  // Background
-  const bg = ctx.createLinearGradient(0,0,512,512);
-  bg.addColorStop(0,'#1a1a2e');
-  bg.addColorStop(1,'#2d2d4e');
-  ctx.fillStyle = bg;
-  const r = 100;
-  ctx.beginPath();
-  ctx.moveTo(r,0); ctx.lineTo(512-r,0);
-  ctx.quadraticCurveTo(512,0,512,r);
-  ctx.lineTo(512,512-r);
-  ctx.quadraticCurveTo(512,512,512-r,512);
-  ctx.lineTo(r,512);
-  ctx.quadraticCurveTo(0,512,0,512-r);
-  ctx.lineTo(0,r);
-  ctx.quadraticCurveTo(0,0,r,0);
-  ctx.fill();
-  // Gold decorative line
-  ctx.strokeStyle = '#d4a853';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(80,370); ctx.lineTo(432,370);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(80,374); ctx.lineTo(432,374);
-  ctx.strokeStyle = 'rgba(212,168,83,0.3)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  // "vocab" in script style
-  ctx.fillStyle = '#d4a853';
-  ctx.font = 'italic bold 148px Georgia, serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.shadowColor = 'rgba(212,168,83,0.4)';
-  ctx.shadowBlur = 20;
-  ctx.fillText('vocab', 256, 240);
-  // subtitle
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = 'rgba(247,243,238,0.5)';
-  ctx.font = '400 36px Georgia, serif';
-  ctx.letterSpacing = '4px';
-  ctx.fillText('單字本', 256, 420);
-  const link = document.createElement('link');
-  link.rel = 'apple-touch-icon';
-  link.href = c.toDataURL('image/png');
-  document.head.appendChild(link);
-})();
-</script>
+
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
