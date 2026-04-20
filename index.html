@@ -28,6 +28,26 @@ html, body { height:100%; background:var(--bg); font-family:var(--font); color:v
 /* ── SHELL ── */
 .app { display:flex; flex-direction:column; height:100vh; max-width:480px; margin:0 auto; position:relative; background:var(--bg); }
 
+/* ── TABLET ── */
+@media (min-width: 768px) {
+  body { background:#e0dace; }
+  .app { flex-direction:row; max-width:100%; }
+  .sidebar { display:flex; flex-direction:column; width:210px; min-width:210px; background:var(--header); height:100vh; flex-shrink:0; }
+  .header { padding:28px 20px 20px; border-bottom:1px solid rgba(255,255,255,0.08); }
+  .tabs { flex-direction:column; border-bottom:none; background:transparent; padding:10px 0; flex:1; }
+  .tab { flex-direction:row; justify-content:flex-start; padding:13px 20px; gap:12px; border-bottom:none; border-left:3px solid transparent; color:rgba(255,255,255,0.5); font-size:14px; }
+  .tab .tab-icon { font-size:18px; }
+  .tab:hover { color:rgba(255,255,255,0.85); background:rgba(255,255,255,0.06); }
+  .tab.active { color:#fff; border-left-color:var(--accent); background:rgba(255,255,255,0.08); border-bottom-color:transparent; }
+  .content-area { flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); }
+  .page { padding:32px 40px; max-width:900px; }
+  #wordList { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .stats-grid { grid-template-columns:repeat(4,1fr); }
+  #quizSetup, #quizActive, #quizResult { max-width:560px; }
+  .modal-overlay { align-items:center; }
+  .modal { border-radius:20px; max-width:520px; }
+}
+
 /* ── HEADER ── */
 .header {
   background:var(--header);
@@ -342,6 +362,7 @@ input[type=file] { display:none; }
 
 <div class="app">
 
+  <div class="sidebar">
   <!-- HEADER -->
   <div class="header">
     <div class="header-title">教甄<span>單字本</span></div>
@@ -355,7 +376,9 @@ input[type=file] { display:none; }
     <button class="tab" onclick="goto('quiz',this)"><span class="tab-icon">🎯</span>測驗</button>
     <button class="tab" onclick="goto('stats',this)"><span class="tab-icon">📊</span>統計</button>
   </div>
+  </div><!-- /sidebar -->
 
+  <div class="content-area">
   <!-- ① WORDLIST -->
   <div class="page active" id="page-wordlist">
     <div class="search-bar">
@@ -512,6 +535,7 @@ input[type=file] { display:none; }
     </div>
   </div>
 
+  </div><!-- /content-area -->
 </div><!-- /app -->
 
 <!-- EDIT MODAL -->
