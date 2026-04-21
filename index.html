@@ -516,7 +516,7 @@ input[type=file] { display:none; }
       <div class="quiz-card" id="qCard">
         <div class="quiz-prompt" id="qPrompt">看英文，選中文</div>
         <div class="quiz-word" id="qWord">—</div>
-        <button class="speak-btn" id="qSpeak" style="font-size:24px;display:none;" onclick="speak(currentWord)">🔊</button>
+        <button class="speak-btn" id="qSpeak" style="font-size:24px;display:none;" onclick="speak(window.__currentWord())">🔊</button>
         <div class="quiz-pos" id="qPos"></div>
       </div>
       <div class="feedback" id="qFeedback"></div>
@@ -869,6 +869,7 @@ function saveEdit() {
 let qDir = 'en2zh', qScope = 'all', qCountOpt = '10';
 let qQueue = [], qIdx = 0, qC = 0, qW = 0, qAnswered = false;
 let currentWord = '';
+window.__currentWord = () => currentWord;
 
 function selDir(v, btn) { qDir = v; document.querySelectorAll('[data-dir]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
 function selScope(v, btn) { qScope = v; document.querySelectorAll('[data-scope]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
