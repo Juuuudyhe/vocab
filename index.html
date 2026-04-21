@@ -584,7 +584,12 @@ input[type=file] { display:none; }
     <div class="modal-title">編輯單字</div>
     <div class="form-section">
       <label class="form-label">英文單字</label>
-      <input type="text" class="form-input" id="mEn">
+      <div class="lookup-row">
+        <input type="text" class="form-input" id="mEn">
+        <button class="lookup-btn" onclick="mLookup()">🔍 查詢</button>
+        <button class="lookup-btn ai" onclick="mAiLookup()">✦ AI</button>
+      </div>
+      <div class="lookup-result" id="mLookupResult"></div>
     </div>
     <div class="form-section">
       <label class="form-label">詞性</label>
@@ -843,6 +848,7 @@ function openEdit(i) {
   document.querySelectorAll('#mPosPills .pos-pill').forEach(p => {
     p.classList.toggle('active', p.dataset.pos === w.pos);
   });
+  document.getElementById('mLookupResult').className = 'lookup-result';
   document.getElementById('editModal').classList.add('open');
 }
 
@@ -1200,6 +1206,79 @@ async function aiLookup() {
   } catch(e) { res.innerHTML = 'AI 查詢失敗'; }
 }
 window.aiLookup = aiLookup;
+
+
+// ══ MODAL LOOKUP ══
+async function mLookup() {
+  const en = document.getElementById('mEn').value.trim();
+  if (!en) { toast('請先輸入英文單字'); return; }
+  const res = document.getElementById('mLookupResult');
+  res.className = 'lookup-result show';
+  res.innerHTML = '查詢中…';
+  try {
+    const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(en)}`);
+    if (!r.ok) { res.innerHTML = '找不到這個單字，請確認拼法'; return; }
+    const data = await r.json();
+    const entry = data[0];
+    const phonetic = entry.phonetic || entry.phonetics?.find(p=>p.text)?.text || '';
+    let html = `<strong>${entry.word}</strong> ${phonetic ? `<span style="color:var(--muted)">${phonetic}</span>` : ''}`;
+    entry.meanings?.slice(0,3).forEach(m => {
+      const def = m.definitions[0];
+      html += `<br><span style="background:var(--bg);padding:1px 7px;border-radius:8px;font-size:11px;margin-right:4px">${m.partOfSpeech}</span>${def.definition}`;
+      if (def.example) html += `<br><em style="color:#aaa;font-size:12px">"${def.example}"</em>`;
+      if (def.example && !document.getElementById('mEx').value) {
+        document.getElementById('mEx').value = def.example;
+      }
+    });
+    if (entry.meanings?.[0]) {
+      const posMap = { noun:'n.', verb:'v.', adjective:'adj.', adverb:'adv.', preposition:'prep.' };
+      const mapped = posMap[entry.meanings[0].partOfSpeech];
+      if (mapped) {
+        document.querySelectorAll('#mPosPills .pos-pill').forEach(p => {
+          p.classList.remove('active');
+          if (p.dataset.pos === mapped) p.classList.add('active');
+        });
+      }
+    }
+    res.innerHTML = html;
+    speak(en);
+  } catch(e) { res.innerHTML = '查詢失敗，請確認網路連線'; }
+}
+window.mLookup = mLookup;
+
+async function mAiLookup() {
+  const en = document.getElementById('mEn').value.trim();
+  if (!en) { toast('請先輸入英文單字'); return; }
+  const res = document.getElementById('mLookupResult');
+  res.className = 'lookup-result show';
+  res.innerHTML = '✦ AI 查詢中…';
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        messages:[{ role:'user', content:`查詢英文單字「${en}」，請用JSON回覆，格式：{"zh":"中文意思","pos":"詞性縮寫如n./v./adj./adv./phr.","example":"一句英文例句（教育相關情境）"}，只回JSON不要其他文字。` }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.[0]?.text || '';
+    const clean = text.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    if (parsed.zh && !document.getElementById('mZh').value) document.getElementById('mZh').value = parsed.zh;
+    if (parsed.example) document.getElementById('mEx').value = parsed.example;
+    if (parsed.pos) {
+      document.querySelectorAll('#mPosPills .pos-pill').forEach(p => {
+        p.classList.remove('active');
+        if (p.dataset.pos === parsed.pos) p.classList.add('active');
+      });
+    }
+    res.innerHTML = `<strong>AI 已自動填入</strong><br>中文：${parsed.zh}<br>詞性：${parsed.pos}<br><em style="color:#aaa;font-size:12px">${parsed.example}</em>`;
+    speak(en);
+  } catch(e) { res.innerHTML = 'AI 查詢失敗'; }
+}
+window.mAiLookup = mAiLookup;
 
 // ══ UTILS ══
 function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
