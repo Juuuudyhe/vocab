@@ -478,10 +478,11 @@ input[type=file] { display:none; }
       <div class="quiz-section-title">測驗<span>模式</span></div>
 
       <div class="quiz-group">
-        <div class="quiz-group-label">方向</div>
-        <div class="quiz-toggle">
+        <div class="quiz-group-label">模式</div>
+        <div class="quiz-toggle" style="flex-wrap:wrap;gap:8px;">
           <button class="toggle-btn active" data-dir="en2zh" onclick="selDir('en2zh',this)">英文 → 中文</button>
           <button class="toggle-btn" data-dir="zh2en" onclick="selDir('zh2en',this)">中文 → 英文</button>
+          <button class="toggle-btn" data-dir="blank" onclick="selDir('blank',this)" style="flex:1 1 100%;">📝 填空題（例句挖空）</button>
         </div>
       </div>
 
@@ -513,6 +514,10 @@ input[type=file] { display:none; }
         <span id="qScr">✓ 0 &nbsp; ✗ 0</span>
       </div>
       <div class="progress-bar"><div class="progress-fill" id="qFill" style="width:0%"></div></div>
+      <div class="timer-wrap" id="timerWrap">
+        <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+        <div class="timer-text" id="timerText">15</div>
+      </div>
       <div class="quiz-card" id="qCard">
         <div class="quiz-prompt" id="qPrompt">看英文，選中文</div>
         <div class="quiz-word" id="qWord">—</div>
@@ -713,6 +718,8 @@ window.checkMC = checkMC;
 window.checkType = checkType;
 window.nextQ = nextQ;
 window.resetErrors = resetErrors;
+window.buildBlankQuestion = buildBlankQuestion;
+window.buildBlankOpts = buildBlankOpts;
 window.exportWords = exportWords;
 window.importWords = importWords;
 
@@ -889,7 +896,8 @@ function showSetup() {
 
 function startQuiz() {
   let pool = qScope === 'errors' ? words.filter(w => w.errors > 0) : [...words];
-  if (pool.length < 2) { toast('⚠️ 至少需要 2 個單字才能測驗'); return; }
+  if (qDir === 'blank') pool = pool.filter(w => w.example && w.example.trim().length > 0);
+  if (pool.length < 2) { toast(qDir === 'blank' ? '⚠️ 填空題需要至少 2 個有例句的單字' : '⚠️ 至少需要 2 個單字才能測驗'); return; }
   shuffle(pool);
   const n = qCountOpt === 'all' ? pool.length : Math.min(+qCountOpt, pool.length);
   qQueue = pool.slice(0, n);
@@ -912,6 +920,7 @@ function renderQ() {
   document.getElementById('qFeedback').className = 'feedback';
   document.getElementById('qWord').textContent = '';
   document.getElementById('qSpeak').style.display = 'none';
+  document.getElementById('qPos').textContent = '';
 
   const mcGrid = document.getElementById('mcGrid');
   const typeInp = document.getElementById('typeInp');
@@ -919,16 +928,37 @@ function renderQ() {
   const nextBtn = document.getElementById('nextBtn');
   const skipBtn = document.getElementById('skipBtn');
   nextBtn.style.display = 'none'; skipBtn.style.display = '';
-
-  // 兩個方向都用四選一
   typeInp.style.display = 'none'; checkBtn.style.display = 'none';
   mcGrid.style.display = '';
 
-  if (qDir === 'en2zh') {
-    document.getElementById('qPrompt').textContent = '看英文，選中文意思';
-      document.getElementById('qWord').textContent = w.en;
+  if (qDir === 'blank') {
+    // 填空題：需要有例句，否則跳過
+    const withEx = qQueue.filter(x => x.example && x.example.trim().length > 0);
+    if (!w.example || !w.example.trim()) {
+      // skip this word silently
+      qIdx++;
+      if (qIdx >= qQueue.length) { showResult(); return; }
+      const nextW = qQueue[qIdx];
+      if (!nextW.example) { qIdx++; renderQ(); return; }
+      renderQ(); return;
+    }
+    const blanked = buildBlankQuestion(w);
+    document.getElementById('qPrompt').textContent = '填空：選出正確的單字';
+    document.getElementById('qWord').textContent = blanked;
+    document.getElementById('qWord').style.fontSize = blanked.length > 60 ? '15px' : blanked.length > 40 ? '17px' : '20px';
     document.getElementById('qSpeak').dataset.word = w.en;
     document.getElementById('qSpeak').style.display = '';
+    const opts = buildBlankOpts(w);
+    mcGrid.innerHTML = opts.map(o =>
+      `<button class="mc-btn" onclick="checkMC(this,'${esc(o.en)}','${esc(w.en)}')">${o.en}</button>`
+    ).join('');
+  } else if (qDir === 'en2zh') {
+    document.getElementById('qPrompt').textContent = '看英文，選中文意思';
+    document.getElementById('qWord').textContent = w.en;
+    document.getElementById('qWord').style.fontSize = '';
+    document.getElementById('qSpeak').dataset.word = w.en;
+    document.getElementById('qSpeak').style.display = '';
+    document.getElementById('qPos').textContent = w.pos || '';
     const opts = buildOpts(w);
     mcGrid.innerHTML = opts.map(o =>
       `<button class="mc-btn" onclick="checkMC(this,'${esc(o.en)}','${esc(w.en)}')">${o.zh}</button>`
@@ -936,6 +966,7 @@ function renderQ() {
   } else {
     document.getElementById('qPrompt').textContent = '看中文，選英文單字';
     document.getElementById('qWord').textContent = w.zh;
+    document.getElementById('qWord').style.fontSize = '';
     document.getElementById('qSpeak').dataset.word = w.en;
     document.getElementById('qSpeak').style.display = '';
     document.getElementById('qPos').textContent = w.pos || '';
@@ -944,6 +975,7 @@ function renderQ() {
       `<button class="mc-btn" onclick="checkMC(this,'${esc(o.en)}','${esc(w.en)}')">${o.en}</button>`
     ).join('');
   }
+  startTimer();
 }
 
 function esc(s) { return s.replace(/'/g, "\\'"); }
@@ -963,6 +995,7 @@ function buildOpts(correct) {
 function checkMC(btn, selectedEn, correctEn) {
   if (qAnswered) return;
   qAnswered = true;
+  stopTimer();
   document.querySelectorAll('.mc-btn').forEach(b => b.disabled = true);
   const w = qQueue[qIdx];
   const wi = words.findIndex(x => x.en === w.en);
@@ -976,7 +1009,7 @@ function checkMC(btn, selectedEn, correctEn) {
     document.querySelectorAll('.mc-btn').forEach(b => {
       if (b.getAttribute('onclick')?.includes(`'${esc(correctEn)}'`)) b.className = 'mc-btn correct';
     });
-    setFeedback(false, qDir === 'en2zh' ? `錯誤！正確是：${w.zh}` : `錯誤！正確是：${w.en}`);
+    setFeedback(false, (qDir === 'en2zh' || qDir === 'blank') ? `錯誤！正確是：${w.zh}（${w.en}）` : `錯誤！正確是：${w.en}`);
     words[wi].errors++; qW++;
   }
   gTotalAns++; persist();
@@ -998,7 +1031,7 @@ function checkType() {
     qC++; gTotalC++;
   } else {
     inp.className = 'type-input wrong';
-    setFeedback(false, qDir === 'en2zh' ? `錯誤！正確是：${w.zh}` : `錯誤！正確是：${w.en}`);
+    setFeedback(false, (qDir === 'en2zh' || qDir === 'blank') ? `錯誤！正確是：${w.zh}（${w.en}）` : `錯誤！正確是：${w.en}`);
     words[wi].errors++; qW++;
   }
   inp.disabled = true; persist();
@@ -1014,6 +1047,7 @@ function setFeedback(ok, msg) {
 }
 
 function nextQ() {
+  stopTimer();
   if (!qAnswered) {
     const w = qQueue[qIdx];
     const wi = words.findIndex(x => x.en === w.en);
@@ -1025,6 +1059,7 @@ function nextQ() {
 }
 
 function showResult() {
+  stopTimer();
   document.getElementById('quizActive').style.display = 'none';
   document.getElementById('quizResult').style.display = '';
   const total = qQueue.length;
@@ -1152,7 +1187,7 @@ async function lookupWord() {
       // scan all definitions for an example
       if (!bestExample) {
         for (const d of m.definitions) {
-          if (d.example) { bestExample = d.example; break; }
+          if (d.example && d.example.split(' ').length >= 8) { bestExample = d.example; break; }
         }
       }
     });
@@ -1236,7 +1271,7 @@ async function mLookup() {
       html += `<br><span style="background:var(--bg);padding:1px 7px;border-radius:8px;font-size:11px;margin-right:4px">${m.partOfSpeech}</span>${def.definition}`;
       if (!mBestExample) {
         for (const d of m.definitions) {
-          if (d.example) { mBestExample = d.example; break; }
+          if (d.example && d.example.split(' ').length >= 8) { mBestExample = d.example; break; }
         }
       }
     });
@@ -1295,6 +1330,90 @@ async function mAiLookup() {
   } catch(e) { res.innerHTML = 'AI 查詢失敗'; }
 }
 window.mAiLookup = mAiLookup;
+
+
+// ══ TIMER ══
+const TIMER_SEC = 15;
+let timerInterval = null;
+let timerLeft = TIMER_SEC;
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timerLeft = TIMER_SEC;
+  updateTimerUI();
+  timerInterval = setInterval(() => {
+    timerLeft--;
+    updateTimerUI();
+    if (timerLeft <= 0) {
+      clearInterval(timerInterval);
+      timeUp();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+function updateTimerUI() {
+  const fill = document.getElementById('timerFill');
+  const text = document.getElementById('timerText');
+  if (!fill || !text) return;
+  fill.style.width = (timerLeft / TIMER_SEC * 100) + '%';
+  fill.style.background = timerLeft <= 5 ? 'var(--red)' : 'var(--accent)';
+  text.textContent = timerLeft;
+  text.className = 'timer-text' + (timerLeft <= 5 ? ' urgent' : '');
+}
+
+function timeUp() {
+  if (qAnswered) return;
+  qAnswered = true;
+  const w = qQueue[qIdx];
+  const wi = words.findIndex(x => x.en === w.en);
+  words[wi].tested++; words[wi].errors++; gTotalAns++; qW++;
+  persist();
+  // disable all mc buttons and show correct
+  document.querySelectorAll('.mc-btn').forEach(b => {
+    b.disabled = true;
+    const isCorrect = qDir === 'en2zh' || qDir === 'blank'
+      ? b.textContent === w.zh
+      : b.textContent === w.en;
+    if (isCorrect) b.className = 'mc-btn correct';
+  });
+  setFeedback(false, `時間到！正確是：${qDir === 'zh2en' ? w.en : w.zh}`);
+  document.getElementById('nextBtn').style.display = '';
+  document.getElementById('skipBtn').style.display = 'none';
+  document.getElementById('qScr').textContent = `✓ ${qC}   ✗ ${qW}`;
+}
+
+// ══ BLANK MODE ══
+function buildBlankQuestion(w) {
+  // replace the word (or phrase) in example with blanks
+  const ex = w.example || '';
+  const term = w.en;
+  // case-insensitive replace
+  const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+  const blanked = ex.replace(regex, '______');
+  if (blanked === ex) {
+    // phrase might be different form - try first word of phrase
+    const firstWord = term.split(/\s+/)[0];
+    const regex2 = new RegExp('\\b' + firstWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\w*\\b', 'gi');
+    return ex.replace(regex2, '______');
+  }
+  return blanked;
+}
+
+function buildBlankOpts(correct) {
+  // same as buildOpts but returns zh for display
+  const samePos = words.filter(w => w.en !== correct.en && w.pos === correct.pos && correct.pos !== '' && w.zh);
+  const diffPos = words.filter(w => w.en !== correct.en && (w.pos !== correct.pos || correct.pos === '') && w.zh);
+  shuffle(samePos); shuffle(diffPos);
+  const distractors = [...samePos, ...diffPos].slice(0, 3);
+  const opts = [correct, ...distractors];
+  shuffle(opts);
+  return opts;
+}
 
 // ══ UTILS ══
 function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
