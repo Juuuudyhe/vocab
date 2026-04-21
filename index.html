@@ -762,7 +762,7 @@ function renderList() {
     const errCls = w.errors > 0 ? '' : 'zero';
     return `<div class="word-item ${cls}">
       <div class="word-main">
-        <div class="word-en">${w.en}${w.pos ? `<span class="word-pos-badge">${w.pos}</span>` : ''} <button class="speak-btn" onclick="speak('${w.en.replace(/'/g,\"'\")}')">🔊</button></div>
+        <div class="word-en">${w.en}${w.pos ? `<span class="word-pos-badge">${w.pos}</span>` : ''} <button class="speak-btn" data-word="${w.en}" onclick="speak(this.dataset.word)">🔊</button></div>
         <div class="word-zh">${w.zh}</div>
         ${w.example ? `<div class="word-ex">${w.example}</div>` : ''}
       </div>
@@ -915,8 +915,13 @@ function renderQ() {
 
   if (qDir === 'en2zh') {
     document.getElementById('qPrompt').textContent = '看英文，選中文意思';
-    document.getElementById('qWord').innerHTML = w.en + ' <button class="speak-btn" onclick="speak(\''+ w.en +'\')" style="font-size:22px">🔊</button>';
+      document.getElementById('qWord').textContent = w.en;
     document.getElementById('qPos').textContent = w.pos || '';
+    // add speak button
+    const spkBtn1 = document.createElement('button');
+    spkBtn1.className = 'speak-btn'; spkBtn1.textContent = '🔊'; spkBtn1.style.fontSize='22px';
+    spkBtn1.onclick = () => speak(w.en);
+    document.getElementById('qWord').insertAdjacentElement('afterend', spkBtn1);
     const opts = buildOpts(w);
     mcGrid.innerHTML = opts.map(o =>
       `<button class="mc-btn" onclick="checkMC(this,'${esc(o.en)}','${esc(w.en)}')">${o.zh}</button>`
