@@ -1103,11 +1103,23 @@ function importWords(e) {
 
 // ══ SPEAK ══
 function speak(text) {
+  if (!text || !text.trim()) return;
   if (!window.speechSynthesis) { toast('⚠️ 此裝置不支援發音'); return; }
+  // iOS Safari requires cancel before speak
   window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'en-US'; u.rate = 0.9;
-  window.speechSynthesis.speak(u);
+  // Small delay needed on iOS
+  setTimeout(() => {
+    const u = new SpeechSynthesisUtterance(text.trim());
+    u.lang = 'en-US';
+    u.rate = 0.85;
+    u.pitch = 1;
+    u.volume = 1;
+    // Force load voices on iOS
+    const voices = window.speechSynthesis.getVoices();
+    const enVoice = voices.find(v => v.lang.startsWith('en'));
+    if (enVoice) u.voice = enVoice;
+    window.speechSynthesis.speak(u);
+  }, 100);
 }
 window.speak = speak;
 
