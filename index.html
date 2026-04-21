@@ -516,6 +516,7 @@ input[type=file] { display:none; }
       <div class="quiz-card" id="qCard">
         <div class="quiz-prompt" id="qPrompt">看英文，選中文</div>
         <div class="quiz-word" id="qWord">—</div>
+        <button class="speak-btn" id="qSpeak" style="font-size:24px;display:none;" onclick="speak(currentWord)">🔊</button>
         <div class="quiz-pos" id="qPos"></div>
       </div>
       <div class="feedback" id="qFeedback"></div>
@@ -867,6 +868,7 @@ function saveEdit() {
 // ══ QUIZ STATE ══
 let qDir = 'en2zh', qScope = 'all', qCountOpt = '10';
 let qQueue = [], qIdx = 0, qC = 0, qW = 0, qAnswered = false;
+let currentWord = '';
 
 function selDir(v, btn) { qDir = v; document.querySelectorAll('[data-dir]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
 function selScope(v, btn) { qScope = v; document.querySelectorAll('[data-scope]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
@@ -901,7 +903,8 @@ function renderQ() {
   document.getElementById('qScr').textContent = `✓ ${qC}   ✗ ${qW}`;
   document.getElementById('qFill').style.width = (qIdx / total * 100) + '%';
   document.getElementById('qFeedback').className = 'feedback';
-  document.getElementById('qWord').textContent = ''; // 清除舊發音按鈕
+  document.getElementById('qWord').textContent = '';
+  document.getElementById('qSpeak').style.display = 'none';
 
   const mcGrid = document.getElementById('mcGrid');
   const typeInp = document.getElementById('typeInp');
@@ -917,12 +920,8 @@ function renderQ() {
   if (qDir === 'en2zh') {
     document.getElementById('qPrompt').textContent = '看英文，選中文意思';
       document.getElementById('qWord').textContent = w.en;
-    document.getElementById('qPos').textContent = w.pos || '';
-    // add speak button
-    const spkBtn1 = document.createElement('button');
-    spkBtn1.className = 'speak-btn'; spkBtn1.textContent = '🔊'; spkBtn1.style.fontSize='22px';
-    spkBtn1.onclick = () => speak(w.en);
-    document.getElementById('qWord').insertAdjacentElement('afterend', spkBtn1);
+    currentWord = w.en;
+    document.getElementById('qSpeak').style.display = '';
     const opts = buildOpts(w);
     mcGrid.innerHTML = opts.map(o =>
       `<button class="mc-btn" onclick="checkMC(this,'${esc(o.en)}','${esc(w.en)}')">${o.zh}</button>`
@@ -930,6 +929,8 @@ function renderQ() {
   } else {
     document.getElementById('qPrompt').textContent = '看中文，選英文單字';
     document.getElementById('qWord').textContent = w.zh;
+    currentWord = w.en;
+    document.getElementById('qSpeak').style.display = '';
     document.getElementById('qPos').textContent = w.pos || '';
     const opts = buildOpts(w);
     mcGrid.innerHTML = opts.map(o =>
