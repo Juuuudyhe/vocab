@@ -967,7 +967,7 @@ function checkMC(btn, selectedEn, correctEn) {
     document.querySelectorAll('.mc-btn').forEach(b => {
       if (b.getAttribute('onclick')?.includes(`'${esc(correctEn)}'`)) b.className = 'mc-btn correct';
     });
-    setFeedback(false, `錯誤！正確是：${w.en}`);
+    setFeedback(false, qDir === 'en2zh' ? `錯誤！正確是：${w.zh}` : `錯誤！正確是：${w.en}`);
     words[wi].errors++; qW++;
   }
   gTotalAns++; persist();
@@ -989,7 +989,7 @@ function checkType() {
     qC++; gTotalC++;
   } else {
     inp.className = 'type-input wrong';
-    setFeedback(false, `錯誤！正確是：${w.en}`);
+    setFeedback(false, qDir === 'en2zh' ? `錯誤！正確是：${w.zh}` : `錯誤！正確是：${w.en}`);
     words[wi].errors++; qW++;
   }
   inp.disabled = true; persist();
