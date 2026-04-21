@@ -357,6 +357,25 @@ html, body { height:100%; background:var(--bg); font-family:var(--font); color:v
 
 input[type=file] { display:none; }
 
+/* ── ANSWER LOG ── */
+.answer-log { margin-top:20px; text-align:left; }
+.answer-log-title { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:10px; }
+.log-item {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:10px 12px; border-radius:12px; margin-bottom:6px;
+  font-size:13px; background:#fff; border:1.5px solid var(--line);
+}
+.log-item.correct { border-color:rgba(58,138,90,0.3); background:rgba(58,138,90,0.05); }
+.log-item.wrong { border-color:rgba(200,57,43,0.25); background:rgba(200,57,43,0.04); }
+.log-icon { font-size:15px; flex-shrink:0; margin-top:1px; }
+.log-en { font-weight:700; color:var(--ink); }
+.log-zh { color:var(--muted); margin-top:1px; }
+.log-wrong-ans { color:var(--red); font-size:12px; margin-top:2px; }
+
+/* ── DELAYED OPTIONS ── */
+.mc-grid.hidden { opacity:0; pointer-events:none; }
+.mc-grid { transition: opacity 0.3s ease; }
+
 /* ── LOOKUP ── */
 .lookup-row { display:flex; gap:8px; margin-bottom:0; }
 .lookup-row .form-input { flex:1; }
@@ -548,6 +567,10 @@ input[type=file] { display:none; }
           <button class="cta-btn secondary" style="flex:1;padding:14px;font-size:14px;" onclick="showSetup()">返回設定</button>
           <button class="cta-btn" style="flex:1;padding:14px;font-size:14px;" onclick="startQuiz()">再測一次</button>
         </div>
+        <div class="answer-log">
+          <div class="answer-log-title">📋 本次答題紀錄</div>
+          <div id="answerLog"></div>
+        </div>
       </div>
     </div>
 
@@ -720,6 +743,7 @@ window.nextQ = nextQ;
 window.resetErrors = resetErrors;
 window.buildBlankQuestion = buildBlankQuestion;
 window.buildBlankOpts = buildBlankOpts;
+window.qLog = () => qLog;
 window.exportWords = exportWords;
 window.importWords = importWords;
 
@@ -881,6 +905,7 @@ function saveEdit() {
 // ══ QUIZ STATE ══
 let qDir = 'en2zh', qScope = 'all', qCountOpt = '10';
 let qQueue = [], qIdx = 0, qC = 0, qW = 0, qAnswered = false;
+let qLog = []; // answer log for this session
 let currentWord = '';
 window.__currentWord = () => currentWord;
 
@@ -901,7 +926,7 @@ function startQuiz() {
   shuffle(pool);
   const n = qCountOpt === 'all' ? pool.length : Math.min(+qCountOpt, pool.length);
   qQueue = pool.slice(0, n);
-  qIdx = 0; qC = 0; qW = 0; qAnswered = false;
+  qIdx = 0; qC = 0; qW = 0; qAnswered = false; qLog = [];
   document.getElementById('quizSetup').style.display = 'none';
   document.getElementById('quizResult').style.display = 'none';
   document.getElementById('quizActive').style.display = '';
@@ -975,6 +1000,9 @@ function renderQ() {
       `<button class="mc-btn" onclick="checkMC(this,'${esc(o.en)}','${esc(w.en)}')">${o.en}</button>`
     ).join('');
   }
+  // hide options for 2 seconds to encourage thinking first
+  mcGrid.classList.add('hidden');
+  setTimeout(() => { mcGrid.classList.remove('hidden'); }, 2000);
   startTimer();
 }
 
@@ -1004,6 +1032,7 @@ function checkMC(btn, selectedEn, correctEn) {
     btn.className = 'mc-btn correct';
     setFeedback(true, '正確！🎉');
     qC++; gTotalC++;
+    qLog.push({ w, correct: true, selected: selectedEn });
   } else {
     btn.className = 'mc-btn wrong';
     document.querySelectorAll('.mc-btn').forEach(b => {
@@ -1011,6 +1040,10 @@ function checkMC(btn, selectedEn, correctEn) {
     });
     setFeedback(false, (qDir === 'en2zh' || qDir === 'blank') ? `錯誤！正確是：${w.zh}（${w.en}）` : `錯誤！正確是：${w.en}`);
     words[wi].errors++; qW++;
+    // find what was selected
+    const selWord = words.find(x => x.en === selectedEn);
+    const selDisplay = qDir === 'zh2en' ? selectedEn : (selWord?.zh || selectedEn);
+    qLog.push({ w, correct: false, selected: selDisplay });
   }
   gTotalAns++; persist();
   document.getElementById('nextBtn').style.display = '';
@@ -1053,6 +1086,7 @@ function nextQ() {
     const wi = words.findIndex(x => x.en === w.en);
     if (wi >= 0) { words[wi].tested++; words[wi].errors++; gTotalAns++; }
     qW++; persist();
+    qLog.push({ w, correct: false, selected: '（跳過）' });
   }
   qIdx++;
   renderQ();
@@ -1069,6 +1103,26 @@ function showResult() {
   document.getElementById('resC').textContent = qC;
   document.getElementById('resW').textContent = qW;
   document.getElementById('resEmoji').textContent = pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📖';
+  // render answer log
+  const logEl = document.getElementById('answerLog');
+  if (logEl) {
+    logEl.innerHTML = qLog.map(entry => {
+      const w = entry.w;
+      const cls = entry.correct ? 'correct' : 'wrong';
+      const icon = entry.correct ? '✅' : '❌';
+      const mainLabel = qDir === 'zh2en' ? w.zh : w.en;
+      const ansLabel = qDir === 'zh2en' ? w.en : w.zh;
+      const wrongLine = !entry.correct ? `<div class="log-wrong-ans">你選了：${entry.selected}</div>` : '';
+      return `<div class="log-item ${cls}">
+        <span class="log-icon">${icon}</span>
+        <div>
+          <div class="log-en">${mainLabel}</div>
+          <div class="log-zh">${ansLabel}</div>
+          ${wrongLine}
+        </div>
+      </div>`;
+    }).join('');
+  }
   renderStats();
 }
 
