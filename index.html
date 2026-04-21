@@ -1144,16 +1144,24 @@ async function lookupWord() {
     const phonetic = entry.phonetic || entry.phonetics?.find(p=>p.text)?.text || '';
     let html = `<strong>${entry.word}</strong> ${phonetic ? `<span style="color:var(--muted)">${phonetic}</span>` : ''}`;
 
-    // collect meanings
+    // collect meanings + find best example
+    let bestExample = '';
     entry.meanings?.slice(0,3).forEach(m => {
       const def = m.definitions[0];
       html += `<br><span style="background:var(--bg);padding:1px 7px;border-radius:8px;font-size:11px;margin-right:4px">${m.partOfSpeech}</span>${def.definition}`;
-      if (def.example) html += `<br><em style="color:#aaa;font-size:12px">"${def.example}"</em>`;
-      // auto fill example if empty
-      if (def.example && !document.getElementById('fEx').value) {
-        document.getElementById('fEx').value = def.example;
+      // scan all definitions for an example
+      if (!bestExample) {
+        for (const d of m.definitions) {
+          if (d.example) { bestExample = d.example; break; }
+        }
       }
     });
+    if (bestExample) {
+      html += `<br><em style="color:#aaa;font-size:12px">"${bestExample}"</em>`;
+      if (!document.getElementById('fEx').value) {
+        document.getElementById('fEx').value = bestExample;
+      }
+    }
 
     // auto fill pos if empty
     if (!selPosVal && entry.meanings?.[0]) {
@@ -1222,14 +1230,22 @@ async function mLookup() {
     const entry = data[0];
     const phonetic = entry.phonetic || entry.phonetics?.find(p=>p.text)?.text || '';
     let html = `<strong>${entry.word}</strong> ${phonetic ? `<span style="color:var(--muted)">${phonetic}</span>` : ''}`;
+    let mBestExample = '';
     entry.meanings?.slice(0,3).forEach(m => {
       const def = m.definitions[0];
       html += `<br><span style="background:var(--bg);padding:1px 7px;border-radius:8px;font-size:11px;margin-right:4px">${m.partOfSpeech}</span>${def.definition}`;
-      if (def.example) html += `<br><em style="color:#aaa;font-size:12px">"${def.example}"</em>`;
-      if (def.example && !document.getElementById('mEx').value) {
-        document.getElementById('mEx').value = def.example;
+      if (!mBestExample) {
+        for (const d of m.definitions) {
+          if (d.example) { mBestExample = d.example; break; }
+        }
       }
     });
+    if (mBestExample) {
+      html += `<br><em style="color:#aaa;font-size:12px">"${mBestExample}"</em>`;
+      if (!document.getElementById('mEx').value) {
+        document.getElementById('mEx').value = mBestExample;
+      }
+    }
     if (entry.meanings?.[0]) {
       const posMap = { noun:'n.', verb:'v.', adjective:'adj.', adverb:'adv.', preposition:'prep.' };
       const mapped = posMap[entry.meanings[0].partOfSpeech];
