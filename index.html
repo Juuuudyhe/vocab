@@ -901,6 +901,7 @@ function renderQ() {
   document.getElementById('qScr').textContent = `✓ ${qC}   ✗ ${qW}`;
   document.getElementById('qFill').style.width = (qIdx / total * 100) + '%';
   document.getElementById('qFeedback').className = 'feedback';
+  document.getElementById('qWord').textContent = ''; // 清除舊發音按鈕
 
   const mcGrid = document.getElementById('mcGrid');
   const typeInp = document.getElementById('typeInp');
