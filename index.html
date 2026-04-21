@@ -416,7 +416,7 @@ input[type=file] { display:none; }
   <div class="page active" id="page-wordlist">
     <div class="search-bar">
       <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="搜尋單字…" oninput="renderList()">
+      <input type="text" id="searchInput" placeholder="搜尋單字…" oninput="renderList()" onkeyup="renderList()">
     </div>
     <div class="pills">
       <button class="pill active" data-f="all" onclick="setFilter('all',this)">全部</button>
@@ -729,7 +729,7 @@ function goto(name, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   btn.classList.add('active');
-  if (name === 'wordlist') renderList();
+  if (name === 'wordlist') { document.getElementById('searchInput').value = ''; renderList(); }
   if (name === 'stats') renderStats();
   if (name === 'add') resetAddForm();
   if (name === 'quiz') showSetup();
