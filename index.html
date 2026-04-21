@@ -516,7 +516,7 @@ input[type=file] { display:none; }
       <div class="quiz-card" id="qCard">
         <div class="quiz-prompt" id="qPrompt">看英文，選中文</div>
         <div class="quiz-word" id="qWord">—</div>
-        <button class="speak-btn" id="qSpeak" style="font-size:24px;display:none;" onclick="speak(window.__currentWord())">🔊</button>
+        <button class="speak-btn" id="qSpeak" style="font-size:24px;display:none;" onclick="speak(this.dataset.word)" data-word="">🔊</button>
         <div class="quiz-pos" id="qPos"></div>
       </div>
       <div class="feedback" id="qFeedback"></div>
@@ -921,7 +921,7 @@ function renderQ() {
   if (qDir === 'en2zh') {
     document.getElementById('qPrompt').textContent = '看英文，選中文意思';
       document.getElementById('qWord').textContent = w.en;
-    currentWord = w.en;
+    document.getElementById('qSpeak').dataset.word = w.en;
     document.getElementById('qSpeak').style.display = '';
     const opts = buildOpts(w);
     mcGrid.innerHTML = opts.map(o =>
@@ -930,7 +930,7 @@ function renderQ() {
   } else {
     document.getElementById('qPrompt').textContent = '看中文，選英文單字';
     document.getElementById('qWord').textContent = w.zh;
-    currentWord = w.en;
+    document.getElementById('qSpeak').dataset.word = w.en;
     document.getElementById('qSpeak').style.display = '';
     document.getElementById('qPos').textContent = w.pos || '';
     const opts = buildOpts(w);
