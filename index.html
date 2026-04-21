@@ -356,6 +356,39 @@ html, body { height:100%; background:var(--bg); font-family:var(--font); color:v
 .modal-title { font-size:18px; font-weight:700; margin-bottom:20px; }
 
 input[type=file] { display:none; }
+
+/* ── LOOKUP ── */
+.lookup-row { display:flex; gap:8px; margin-bottom:0; }
+.lookup-row .form-input { flex:1; }
+.lookup-btn {
+  padding:0 18px; border-radius:14px; border:none;
+  background:var(--ink); color:#fff; font-size:14px; font-weight:600;
+  font-family:var(--font); cursor:pointer; white-space:nowrap; flex-shrink:0;
+  transition:all .15s;
+}
+.lookup-btn:active { transform:scale(0.97); }
+.lookup-btn.ai { background:var(--accent); }
+.lookup-result {
+  background:#fff; border-radius:12px; padding:14px 16px;
+  margin-top:10px; font-size:13px; color:var(--muted);
+  border:1.5px solid var(--line); display:none; line-height:1.7;
+}
+.lookup-result.show { display:block; }
+.lookup-result strong { color:var(--ink); }
+
+/* ── SPEAK BTN ── */
+.speak-btn {
+  background:none; border:none; cursor:pointer; font-size:18px;
+  padding:4px; opacity:0.6; transition:opacity .15s; vertical-align:middle;
+}
+.speak-btn:hover { opacity:1; }
+
+/* ── TIMER BAR ── */
+.timer-wrap { margin-bottom:10px; }
+.timer-bar { height:4px; background:var(--line); border-radius:2px; overflow:hidden; }
+.timer-fill { height:100%; background:var(--accent); border-radius:2px; transition:width 1s linear; }
+.timer-text { font-size:12px; color:var(--muted); text-align:right; margin-top:3px; }
+.timer-text.urgent { color:var(--red); font-weight:600; }
 </style>
 </head>
 <body>
@@ -396,7 +429,12 @@ input[type=file] { display:none; }
   <div class="page" id="page-add">
     <div class="form-section">
       <label class="form-label">英文單字 <span>*</span></label>
-      <input type="text" class="form-input" id="fEn" placeholder="e.g. curriculum">
+      <div class="lookup-row">
+        <input type="text" class="form-input" id="fEn" placeholder="e.g. curriculum">
+        <button class="lookup-btn" onclick="lookupWord()">🔍 查詢</button>
+        <button class="lookup-btn ai" onclick="aiLookup()">✦ AI</button>
+      </div>
+      <div class="lookup-result" id="lookupResult"></div>
     </div>
     <div class="form-section">
       <label class="form-label">詞性</label>
@@ -460,6 +498,7 @@ input[type=file] { display:none; }
         <div class="count-btns">
           <button class="count-btn active" data-n="10" onclick="selCount('10',this)">10 題</button>
           <button class="count-btn" data-n="20" onclick="selCount('20',this)">20 題</button>
+          <button class="count-btn" data-n="30" onclick="selCount('30',this)">30 題</button>
           <button class="count-btn" data-n="all" onclick="selCount('all',this)">全部</button>
         </div>
       </div>
@@ -723,7 +762,7 @@ function renderList() {
     const errCls = w.errors > 0 ? '' : 'zero';
     return `<div class="word-item ${cls}">
       <div class="word-main">
-        <div class="word-en">${w.en}${w.pos ? `<span class="word-pos-badge">${w.pos}</span>` : ''}</div>
+        <div class="word-en">${w.en}${w.pos ? `<span class="word-pos-badge">${w.pos}</span>` : ''} <button class="speak-btn" onclick="speak('${w.en.replace(/'/g,\"'\")}')">🔊</button></div>
         <div class="word-zh">${w.zh}</div>
         ${w.example ? `<div class="word-ex">${w.example}</div>` : ''}
       </div>
@@ -876,7 +915,7 @@ function renderQ() {
 
   if (qDir === 'en2zh') {
     document.getElementById('qPrompt').textContent = '看英文，選中文意思';
-    document.getElementById('qWord').textContent = w.en;
+    document.getElementById('qWord').innerHTML = w.en + ' <button class="speak-btn" onclick="speak(\''+ w.en +'\')" style="font-size:22px">🔊</button>';
     document.getElementById('qPos').textContent = w.pos || '';
     const opts = buildOpts(w);
     mcGrid.innerHTML = opts.map(o =>
@@ -923,7 +962,7 @@ function checkMC(btn, selectedEn, correctEn) {
     document.querySelectorAll('.mc-btn').forEach(b => {
       if (b.getAttribute('onclick')?.includes(`'${esc(correctEn)}'`)) b.className = 'mc-btn correct';
     });
-    setFeedback(false, `錯誤！正確是：${w.zh}`);
+    setFeedback(false, `錯誤！正確是：${w.en}`);
     words[wi].errors++; qW++;
   }
   gTotalAns++; persist();
@@ -1052,6 +1091,95 @@ function importWords(e) {
   };
   reader.readAsText(file);
 }
+
+
+// ══ SPEAK ══
+function speak(text) {
+  if (!window.speechSynthesis) { toast('⚠️ 此裝置不支援發音'); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = 0.9;
+  window.speechSynthesis.speak(u);
+}
+window.speak = speak;
+
+// ══ LOOKUP (Free Dictionary API) ══
+async function lookupWord() {
+  const en = document.getElementById('fEn').value.trim();
+  if (!en) { toast('請先輸入英文單字'); return; }
+  const res = document.getElementById('lookupResult');
+  res.className = 'lookup-result show';
+  res.innerHTML = '查詢中…';
+  try {
+    const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(en)}`);
+    if (!r.ok) { res.innerHTML = '找不到這個單字，請確認拼法'; return; }
+    const data = await r.json();
+    const entry = data[0];
+    const phonetic = entry.phonetic || entry.phonetics?.find(p=>p.text)?.text || '';
+    let html = `<strong>${entry.word}</strong> ${phonetic ? `<span style="color:var(--muted)">${phonetic}</span>` : ''}`;
+
+    // collect meanings
+    entry.meanings?.slice(0,3).forEach(m => {
+      const def = m.definitions[0];
+      html += `<br><span style="background:var(--bg);padding:1px 7px;border-radius:8px;font-size:11px;margin-right:4px">${m.partOfSpeech}</span>${def.definition}`;
+      if (def.example) html += `<br><em style="color:#aaa;font-size:12px">"${def.example}"</em>`;
+      // auto fill example if empty
+      if (def.example && !document.getElementById('fEx').value) {
+        document.getElementById('fEx').value = def.example;
+      }
+    });
+
+    // auto fill pos if empty
+    if (!selPosVal && entry.meanings?.[0]) {
+      const posMap = { noun:'n.', verb:'v.', adjective:'adj.', adverb:'adv.', preposition:'prep.' };
+      const mapped = posMap[entry.meanings[0].partOfSpeech];
+      if (mapped) {
+        document.querySelectorAll('#posPills .pos-pill').forEach(p => {
+          if (p.dataset.pos === mapped) { p.click(); }
+        });
+      }
+    }
+    res.innerHTML = html;
+    speak(en);
+  } catch(e) { res.innerHTML = '查詢失敗，請確認網路連線'; }
+}
+window.lookupWord = lookupWord;
+
+// ══ AI LOOKUP ══
+async function aiLookup() {
+  const en = document.getElementById('fEn').value.trim();
+  if (!en) { toast('請先輸入英文單字'); return; }
+  const res = document.getElementById('lookupResult');
+  res.className = 'lookup-result show';
+  res.innerHTML = '✦ AI 查詢中…';
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        messages:[{ role:'user', content:`查詢英文單字「${en}」，請用JSON回覆，格式：{"zh":"中文意思","pos":"詞性縮寫如n./v./adj./adv./phr.","example":"一句英文例句（教育相關情境）"}，只回JSON不要其他文字。` }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.[0]?.text || '';
+    const clean = text.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+
+    // auto fill fields
+    if (parsed.zh && !document.getElementById('fZh').value) document.getElementById('fZh').value = parsed.zh;
+    if (parsed.example && !document.getElementById('fEx').value) document.getElementById('fEx').value = parsed.example;
+    if (parsed.pos) {
+      document.querySelectorAll('#posPills .pos-pill').forEach(p => {
+        if (p.dataset.pos === parsed.pos) p.click();
+      });
+    }
+    res.innerHTML = `<strong>AI 已自動填入</strong><br>中文：${parsed.zh}<br>詞性：${parsed.pos}<br><em style="color:#aaa;font-size:12px">${parsed.example}</em>`;
+    speak(en);
+  } catch(e) { res.innerHTML = 'AI 查詢失敗'; }
+}
+window.aiLookup = aiLookup;
 
 // ══ UTILS ══
 function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
