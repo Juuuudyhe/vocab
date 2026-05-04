@@ -1043,7 +1043,9 @@ function checkMC(btn, selectedEn, correctEn) {
     words[wi].errors++; qW++;
     // find what was selected
     const selWord = words.find(x => x.en === selectedEn);
-    const selDisplay = qDir === 'zh2en' ? selectedEn : (selWord?.zh || selectedEn);
+    const selZh = selWord?.zh || '';
+    const selEn = selectedEn;
+    const selDisplay = selZh && selEn ? `${selZh}（${selEn}）` : (selEn || selZh);
     qLog.push({ w, correct: false, selected: selDisplay });
   }
   gTotalAns++; persist();
