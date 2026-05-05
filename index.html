@@ -1034,6 +1034,23 @@ function checkMC(btn, selectedEn, correctEn) {
     setFeedback(true, '正確！🎉');
     qC++; gTotalC++;
     qLog.push({ w, correct: true, selected: selectedEn });
+    // 填空題答對後，每個選項旁顯示中文
+    if (qDir === 'blank') {
+      document.querySelectorAll('.mc-btn').forEach(b => {
+        const onclick = b.getAttribute('onclick') || '';
+        const match = onclick.match(/checkMC\(this,'([^']+)'/);
+        if (match) {
+          const en = match[1];
+          const found = words.find(x => x.en === en);
+          if (found && found.zh) {
+            const zhSpan = document.createElement('span');
+            zhSpan.style.cssText = 'display:block;font-size:12px;color:var(--muted);margin-top:3px;font-weight:400;';
+            zhSpan.textContent = found.zh;
+            b.appendChild(zhSpan);
+          }
+        }
+      });
+    }
   } else {
     btn.className = 'mc-btn wrong';
     document.querySelectorAll('.mc-btn').forEach(b => {
