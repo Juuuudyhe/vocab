@@ -976,7 +976,7 @@ function renderQ() {
     document.getElementById('qSpeak').style.display = '';
     const opts = buildBlankOpts(w);
     mcGrid.innerHTML = opts.map(o =>
-      `<button class="mc-btn" onclick="checkMC(this,'${esc(o.en)}','${esc(w.en)}')">${o.en}</button>`
+      `<button class="mc-btn" data-word="${esc(o.en)}" onclick="checkMC(this,'${esc(o.en)}','${esc(w.en)}')">${o.en}</button>`
     ).join('');
   } else if (qDir === 'en2zh') {
     document.getElementById('qPrompt').textContent = '看英文，選中文意思';
@@ -1037,17 +1037,15 @@ function checkMC(btn, selectedEn, correctEn) {
     // 填空題答對後，每個選項旁顯示中文
     if (qDir === 'blank') {
       document.querySelectorAll('.mc-btn').forEach(b => {
-        const onclick = b.getAttribute('onclick') || '';
-        const match = onclick.match(/checkMC\(this,'([^']+)'/);
-        if (match) {
-          const en = match[1];
-          const found = words.find(x => x.en === en);
-          if (found && found.zh) {
-            const zhSpan = document.createElement('span');
-            zhSpan.style.cssText = 'display:block;font-size:12px;color:var(--muted);margin-top:3px;font-weight:400;';
-            zhSpan.textContent = found.zh;
-            b.appendChild(zhSpan);
-          }
+        const en = b.dataset.word;
+        if (!en) return;
+        const found = words.find(x => x.en === en);
+        if (found && found.zh && !b.querySelector('span.zh-hint')) {
+          const zhSpan = document.createElement('span');
+          zhSpan.className = 'zh-hint';
+          zhSpan.style.cssText = 'display:block;font-size:12px;color:var(--muted);margin-top:3px;font-weight:400;';
+          zhSpan.textContent = found.zh;
+          b.appendChild(zhSpan);
         }
       });
     }
@@ -1058,6 +1056,21 @@ function checkMC(btn, selectedEn, correctEn) {
     });
     setFeedback(false, (qDir === 'en2zh' || qDir === 'blank') ? `錯誤！正確是：${w.zh}（${w.en}）` : `錯誤！正確是：${w.en}`);
     words[wi].errors++; qW++;
+    // 填空題答錯後，每個選項旁也顯示中文
+    if (qDir === 'blank') {
+      document.querySelectorAll('.mc-btn').forEach(b => {
+        const en = b.dataset.word;
+        if (!en) return;
+        const found = words.find(x => x.en === en);
+        if (found && found.zh && !b.querySelector('span.zh-hint')) {
+          const zhSpan = document.createElement('span');
+          zhSpan.className = 'zh-hint';
+          zhSpan.style.cssText = 'display:block;font-size:12px;color:var(--muted);margin-top:3px;font-weight:400;';
+          zhSpan.textContent = found.zh;
+          b.appendChild(zhSpan);
+        }
+      });
+    }
     // find what was selected
     const selWord = words.find(x => x.en === selectedEn);
     const selZh = selWord?.zh || '';
